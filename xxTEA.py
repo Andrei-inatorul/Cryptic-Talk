@@ -13,6 +13,7 @@ def encrypt(message : str, key: str, nr_rounds=32) -> str:
     right = int.from_bytes(message[0:4].encode('utf-8'), 'little')
     left = int.from_bytes(message[4:8].encode('utf-8'), 'little')
 
+
     key = struct.unpack('4I', key) # split the key in 4 mini keys of 32 bit -> 4 int
     sum = 0
     for i in range(nr_rounds):
