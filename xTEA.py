@@ -106,16 +106,16 @@ print("decrypt:", d)
 
 
 # --------------------------------------------------------TEST2------------------------------------------------------------------------
-f = open("shrek.txt")
+f = open("example/shrek.txt")
 message = f.read()
 f.close()
 
 c = encrypt_message(message,KEY)
-with open("shrek_cyphertext.txt",'a') as f:
+with open("example/shrek_cyphertext.txt", 'w') as f:
   print(f.write(c))
 f.close()
 
 d = decrypt_message(c,KEY)
-with open("shrek_decrypt.txt",'a') as f:
+with open("example/shrek_decrypt.txt", 'w') as f:
   print(f.write(d))
 f.close()
