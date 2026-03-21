@@ -92,9 +92,7 @@ def decrypt_message(encryted_message: str, key: str):
 # test data
 message = "pneumonoultramicroscopicsilicovolcaniconioza"   # BUG daca pui unicode ț ș iti papa o litera. Vezi: abțiguit
                  # daca pui emoji crapa la decode (cine ar fi creezut). Vezi: 🥰
-#
-# f = open("shrek.txt")
-# message=f.read()
+
 
 #09ca6f9ed30dca69
 print("text: ", message)
@@ -105,3 +103,19 @@ print("cyphertext:",c)
 #-------------------------------------
 d = decrypt_message(c,KEY)
 print("decrypt:", d)
+
+
+# --------------------------------------------------------TEST2------------------------------------------------------------------------
+f = open("shrek.txt")
+message = f.read()
+f.close()
+
+c = encrypt_message(message,KEY)
+with open("shrek_cyphertext.txt",'a') as f:
+  print(f.write(c))
+f.close()
+
+d = decrypt_message(c,KEY)
+with open("shrek_decrypt.txt",'a') as f:
+  print(f.write(d))
+f.close()
