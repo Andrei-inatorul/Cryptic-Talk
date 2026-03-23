@@ -19,9 +19,8 @@ def wifi_setup(hostname: str = "picosoma", ssid: str = "namnet", password: str =
 
 
 def get_addr(hostname: str):
-    # In MicroPython, getaddrinfo is the more robust way to do this
-    # it returns a list of address info tuples
-    addr_info = socket.getaddrinfo(hostname, 80)
+    # ia ip din hostname
+    addr_info = socket.getaddrinfo(hostname, 25565)
     return addr_info[0][-1][0]
 
 
