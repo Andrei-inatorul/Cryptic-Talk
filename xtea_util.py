@@ -15,6 +15,7 @@ def rstrip(message, ch):
     for i in range (len(message) - 1, 0, -1):
         if message[i] != ch:
             break
+
     message = message[0:i+1]
     return message
 
