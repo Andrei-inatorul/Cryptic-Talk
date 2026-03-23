@@ -112,10 +112,10 @@ f.close()
 
 c = encrypt_message(message,KEY)
 with open("example/shrek_cyphertext.txt", 'w') as f:
-  print(f.write(c))
+  f.write(c)
 f.close()
 
 d = decrypt_message(c,KEY)
 with open("example/shrek_decrypt.txt", 'w') as f:
-  print(f.write(d))
+  f.write(d)
 f.close()

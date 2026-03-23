@@ -72,7 +72,7 @@ def main():
             data = socket_listen(s)
             if data is not None:
                 print(data)
-            socket_send(s, "sinep", (ip, port))
+            socket_send(s, "r", (ip, port))
         except OSError:
             print("n-am gasit")
             s.close()
