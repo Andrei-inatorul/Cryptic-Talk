@@ -1,7 +1,5 @@
 import secrets
 import struct
-from pydoc import plaintext
-from typing import Tuple
 
 DELTA = 0x9E3779B9
 MASK = 0XFFFFFFFF
@@ -33,6 +31,7 @@ def encrypt_64b(message: int, key: str, nr_rounds = 32) -> str:
 
 def encrypt_message(message: str, key: str, nr_rounds = 32) -> str: # cu CBC
     IV = secrets.token_bytes(8) # 64 biti random :D
+    print(IV, type(IV))
     last_chunk_int = int.from_bytes(IV, 'little') # intializam cu IV in int
 
     encrypted_message = IV.hex()  # initialization vector necriptat in fata la rezultatul final

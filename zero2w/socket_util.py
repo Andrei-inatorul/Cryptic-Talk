@@ -1,4 +1,6 @@
 import socket
+import xTEA
+
 
 def get_addr(hostname):
     """
@@ -37,9 +39,10 @@ def socket_send(sock: socket.socket, data: str, addr):
     data = bytes(data, 'utf-8')
     sock.sendto(data, addr)
 
-ip = "10.240.33.2" #get_addr("picosoma.local") #
+ip = get_addr("picosoma.local")#"10.240.33.112"#get_addr("picosoma.local") #
 
 s = socket_setup(25565)
-socket_send(s, "aaa", (ip, 25565))
+msg = xTEA.encrypt_message("AAAA", xTEA.KEY)
+socket_send(s, msg, (ip, 25565))
 print("am trimis")
 print(socket_listen(s))
