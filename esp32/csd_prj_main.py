@@ -175,7 +175,13 @@ def main():
             right_pressed_flag = False
         if message is not None:
             socket_send(s, message, addr)
-            message = None
+            message = None ### TO DO: de eliminat linia
+       # daca am primit un mesaj -> il afisez -- unghiul la servo
+        data = socket_listen(s)
+        if data is not None:
+            decrypted_message = XTEA.decrypt_message(data, private_key)
+            lcd.clear()
+            lcd.putstr(decrypted_message)
 #     while True:
 #         data = socket_listen(s)
 #         if data is not None:
