@@ -6,9 +6,10 @@ MASK = 0XFFFFFFFF
 
 #----------------------------------------------------------ENCRYPT----------------------------------------------------------------------
 
-def encrypt_64b(message: int, key: str, nr_rounds = 32) -> str:
+def encrypt_64b(message: int, key: bytes, nr_rounds = 32) -> str:
     # pregatire cheie si mesaj -> daca nu au lungimea destul de mare => padding la final
-    key = key.ljust(16, '0').encode() # cheia 128 bits
+    # key = key.ljust(16, '0').encode() # cheia 128 bits
+    key = key.ljust(16, b'\x00')
 
     message_bytes = message.to_bytes(8, 'little')
 
@@ -29,7 +30,7 @@ def encrypt_64b(message: int, key: str, nr_rounds = 32) -> str:
     cipher_hex = cipher_bytes.hex()
     return cipher_hex
 
-def encrypt_message(message: str, key: str, nr_rounds = 32) -> str: # cu CBC
+def encrypt_message(message: str, key: bytes, nr_rounds = 32) -> str: # cu CBC
     IV = secrets.token_bytes(8) # 64 biti random :D
     print(IV, type(IV))
     last_chunk_int = int.from_bytes(IV, 'little') # intializam cu IV in int
@@ -52,8 +53,9 @@ def encrypt_message(message: str, key: str, nr_rounds = 32) -> str: # cu CBC
 
 #----------------------------------------------------------DECRYPT----------------------------------------------------------------------
 
-def decrypt_64b(cypher: str, key : str, nr_rounds:int = 32) -> int: # chinul meu existential am pus v0 in loc de v1 undeva si crapa T-T acu e ok
-    key = key.ljust(16, '0').encode()
+def decrypt_64b(cypher: str, key : bytes, nr_rounds:int = 32) -> int: # chinul meu existential am pus v0 in loc de v1 undeva si crapa T-T acu e ok
+    # key = key.ljust(16, '0').encode()
+    key = key.ljust(16, b'\x00')
     key = [int.from_bytes(key[0:4], 'little'), int.from_bytes(key[4:8], 'little'),
            int.from_bytes(key[8:12], 'little'), int.from_bytes(key[12:16], 'little')]
 
@@ -70,7 +72,7 @@ def decrypt_64b(cypher: str, key : str, nr_rounds:int = 32) -> int: # chinul meu
 
     return (v1 << 32) | v0 # concatenam si returnam ca int :D
 
-def decrypt_message(encryted_message: str, key: str):
+def decrypt_message(encryted_message: str, key: bytes):
     iv = encryted_message[0:16]
     iv_int = int.from_bytes(bytes.fromhex(iv), 'little')
     plaintext = ""
@@ -87,34 +89,35 @@ def decrypt_message(encryted_message: str, key: str):
 
     return plaintext
 
-#-----------------------------------------------------------TEST------------------------------------------------------------------------
-# test data
-message = "pneumonoultramicroscopicsilicovolcaniconioza"   # BUG daca pui unicode ț ș iti papa o litera. Vezi: abțiguit
-                 # daca pui emoji crapa la decode (cine ar fi creezut). Vezi: 🥰
+if __name__ == '__main__':
+    #-----------------------------------------------------------TEST------------------------------------------------------------------------
+    # test data
+    message = "pneumonoultramicroscopicsilicovolcaniconioza"   # BUG daca pui unicode ț ș iti papa o litera. Vezi: abțiguit
+                     # daca pui emoji crapa la decode (cine ar fi creezut). Vezi: 🥰
 
 
-#09ca6f9ed30dca69
-print("text: ", message)
-KEY = '0123456789012345'
-#------------------------------------
-c = encrypt_message(message, KEY)
-print("cyphertext:",c)
-#-------------------------------------
-d = decrypt_message(c,KEY)
-print("decrypt:", d)
+    #09ca6f9ed30dca69
+    print("text: ", message)
+    KEY = '0123456789012345'
+    #------------------------------------
+    c = encrypt_message(message, KEY)
+    print("cyphertext:",c)
+    #-------------------------------------
+    d = decrypt_message(c,KEY)
+    print("decrypt:", d)
 
 
-# --------------------------------------------------------TEST2------------------------------------------------------------------------
-f = open("example/shrek.txt")
-message = f.read()
-f.close()
+    # --------------------------------------------------------TEST2------------------------------------------------------------------------
+    f = open("example/shrek.txt")
+    message = f.read()
+    f.close()
 
-c = encrypt_message(message,KEY)
-with open("example/shrek_cyphertext.txt", 'w') as f:
-  f.write(c)
-f.close()
+    c = encrypt_message(message,KEY)
+    with open("example/shrek_cyphertext.txt", 'w') as f:
+      f.write(c)
+    f.close()
 
-d = decrypt_message(c,KEY)
-with open("example/shrek_decrypt.txt", 'w') as f:
-  f.write(d)
-f.close()
+    d = decrypt_message(c,KEY)
+    with open("example/shrek_decrypt.txt", 'w') as f:
+      f.write(d)
+    f.close()

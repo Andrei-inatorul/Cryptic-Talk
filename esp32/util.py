@@ -1,6 +1,5 @@
 import network
 
-
 def do_connect(ssid, password):
     import machine, network
     wlan = network.WLAN()
@@ -13,7 +12,6 @@ def do_connect(ssid, password):
     print('connected')
     return wlan.ipconfig('addr4')
 
-
 def print_this(display, text, poz_x, line, color):
     poz_y = 0
     if (line == 1):
@@ -22,5 +20,3 @@ def print_this(display, text, poz_x, line, color):
     display.show()
     display.text(text, poz_x, poz_y, color)
     display.show()
-
-

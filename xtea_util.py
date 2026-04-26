@@ -19,7 +19,9 @@ def rstrip(message, ch):
     message = message[0:i+1]
     return message
 
-mes = "HUNEDOARA"
-mes = rjust(mes, '\0',64)
-print(mes)
-print(rstrip(mes, '\0'))
+
+if __name__ == '__main__':
+    mes = "HUNEDOARA"
+    mes = rjust(mes, '\0',64)
+    print(mes)
+    print(rstrip(mes, '\0'))
