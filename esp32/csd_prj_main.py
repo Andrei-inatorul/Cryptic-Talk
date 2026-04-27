@@ -7,7 +7,6 @@ import i2c_lcd
 from time import sleep_us, ticks_ms, ticks_us, sleep
 import diffie_hellman as dh
 
-
 """
 BUTOANE SI SMECHERII
 """
@@ -21,18 +20,20 @@ ctime_l = 0
 ltime_r = 0
 ctime_r = 0
 
+
 def left_pressed(pin):
     global ctime_l, ltime_l, left_pressed_flag
     ctime_l = ticks_ms()
-    if(abs(ctime_l - ltime_l) > 20): # debounce (aveam 3 apasari cand eu apasam doar o data)
+    if (abs(ctime_l - ltime_l) > 40):  # debounce (aveam 3 apasari cand eu apasam doar o data)
         left_pressed_flag = True
         print("L Button Pressed!")
     ltime_l = ctime_l
-    
+
+
 def right_pressed(pin):
     global ctime_r, ltime_r, right_pressed_flag
     ctime_r = ticks_ms()
-    if(abs(ctime_r - ltime_r) > 20): # debounce (aveam 3 apasari cand eu apasam doar o data)
+    if (abs(ctime_r - ltime_r) > 40):  # debounce (aveam 3 apasari cand eu apasam doar o data)
         right_pressed_flag = True
         print("R Button Pressed!")
     ltime_r = ctime_r
@@ -52,9 +53,10 @@ i2c = I2C(sda=Pin(21), scl=Pin(22), freq=400000)
 
 lcd = i2c_lcd.I2cLcd(i2c, I2C_ADDR, I2C_NUM_ROWS, I2C_NUM_COLS)
 
+
 def wifi_setup(hostname: str = "picosoma", ssid: str = "namnet", password: str = "amuitatparola"):
     wlan = network.WLAN(network.STA_IF)
-#     wlan.disconnect()  # nu stiu daca e necesara asta
+    #     wlan.disconnect()  # nu stiu daca e necesara asta
     wlan.active(True)
     wlan.config(hostname=hostname)
     wlan.config(pm=network.WLAN.PM_NONE)
@@ -92,8 +94,7 @@ def socket_listen(sock):
     try:
         data = sock.recv(1024)
         return data
-    except OSError as e:
-        print(e)
+    except OSError:
         return None
 
 
@@ -115,34 +116,36 @@ def main():
     myip, wifi = wifi_setup()
     port = 25565
     s = socket_setup(myip, port)
-    s.settimeout(2) # asteptam 2 sec daca nu primim nimic apare OSError care isi ia handle in functia de recv adica nu primim nimic
+    s.settimeout(
+        2)  # asteptam 2 sec daca nu primim nimic apare OSError care isi ia handle in functia de recv adica nu primim nimic
     lcd.clear()
     lcd.putstr("Conectat la wifi! =^._.^=")
-#    ip = get_addr("soma.local")  # asta daca ai hostname sau doar folosesti ip-ul
+    #    ip = get_addr("soma.local")  # asta daca ai hostname sau doar folosesti ip-ul
     """
     START DIFFIE HELLMAN
     """
+    hostname = 'minisoma.local'
     try:
-        ip = get_addr("soma.local")
+        ip = get_addr(hostname)
     except OSError:
         lcd.putstr("Nu am gasit ip-ul destinatarului..")
     print(ip)
     while ip == '':
         lcd.clear()
         try:
-            ip = get_addr("soma.local")
+            ip = get_addr(hostname)
         except OSError:
             lcd.putstr("Nu am gasit ip-ul destinatarului..")
         print("incerc sa gasesc ip...")
         lcd.putstr("Incerc sa gasesc ip-ul destinatarului..")
-    #am ip destinatar deci pot sa incep key exchange
+    # am ip destinatar deci pot sa incep key exchange
     private_key, public_key = dh.generate_keypair()
     lcd.clear()
     lcd.putstr("Chei generate cu succes")
     lcd.clear()
-    lcd.putstr(f"Public ...{public_key%100000}")
+    lcd.putstr(f"Public ...{public_key % 100000}")
     lcd.move_to(0, 1)
-    lcd.putstr(f"Private ...{private_key%100000}")
+    lcd.putstr(f"Private ...{private_key % 100000}")
     time.sleep(1)
     lcd.clear()
     lcd.putstr(f"Trimit public")
@@ -166,45 +169,28 @@ def main():
         if left_pressed_flag == True:
             message = XTEA.encrypt_message("LeftButtonPressed", key)
             lcd.clear()
-            lcd.putstr(f"Left  			<-")
+            lcd.putstr(f"Left        <-")
             left_pressed_flag = False
         elif right_pressed_flag == True:
             message = XTEA.encrypt_message("RightButtonPressed", key)
             lcd.clear()
-            lcd.putstr(f"Right 			->")
+            lcd.putstr(f"Right       ->")
             right_pressed_flag = False
         if message is not None:
+            print(message)
             socket_send(s, message, addr)
-            message = None ### TO DO: de eliminat linia
-       # daca am primit un mesaj -> il afisez -- unghiul la servo
+            message = None
+
         data = socket_listen(s)
         if data is not None:
-            decrypted_message = XTEA.decrypt_message(data, private_key)
+            #             data = data.decode('utf-8')
+            decrypted_message = XTEA.decrypt_message(data, key)
+            decrypted_message = decrypted_message.strip('\x00')
             lcd.clear()
             lcd.putstr(decrypted_message)
-#     while True:
-#         data = socket_listen(s)
-#         if data is not None:
-#             print(data)
-#             data_decrypted = decrypt_message(data, '0123456789012345')
-        
-#     print(ip)
-#     while ip != "":
-# #         try:
-#         data = socket_listen(s)
-#         if data is not None:
-#             lcd.clear()
-#             print(data)
-#             data_decrypted = decrypt_message(data, '0123456789012345')
-#             print(data_decryted)
-#             lcd.putstr("cv")
-#             
-#             socket_send(s, "r", (ip, port))
-#         except OSError: 
-#             print("n-am gasit")
-#             s.close()
 
 
 main()
+
 
 

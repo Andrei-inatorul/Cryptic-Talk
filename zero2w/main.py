@@ -15,6 +15,10 @@ display.poweron()
 display.fill(0)
 display.show()
 
+MIN_DUTY = 1638
+MAX_DUTY = 8192
+STEP = 36
+
 servo = GPIO.PWM(8, 50)
 
 def display_text(display, text, pos):
@@ -26,6 +30,11 @@ def display_text(display, text, pos):
 
 
 def main():
+    servo.freq(50)
+    duty = 4915
+
+    servo.duty_u16(duty)
+
     s = socket_setup(25565)
     """
     START DIFFIE HELLMAN
@@ -64,13 +73,25 @@ def main():
     """
     STOP DIFFIE HELLMAN
     """
+
     while True:
+        display.fill(0)
         data = None
         while data is None:
             data = socket_listen(s)
         msg = str(data)
         decrypt = XTEA.decrypt_message(msg, key)
-        # if decrypt ==
+        if decrypt == 'LeftButtonPressed':
+            duty = min(MAX_DUTY, duty + STEP)
+        elif decrypt == 'RightButtonPressed':
+            duty = max(MIN_DUTY, duty - STEP)
+        servo.duty_u16(duty)
+        angle = (duty - MIN_DUTY) / STEP
+        print(angle)
+        display_text(display, str(angle), (0, 0))
+        display.show()
+        reply = XTEA.encrypt_message(str(angle), key)
+
 
 
 try:
