@@ -30,9 +30,8 @@ def encrypt_64b(message: int, key: bytes, nr_rounds = 32) -> str:
     cipher_hex = cipher_bytes.hex()
     return cipher_hex
 
-def encrypt_message(message: str, key: bytes, nr_rounds = 32) -> str: # cu CBC
-    IV = secrets.token_bytes(8) # 64 biti random :D
-    print(IV, type(IV))
+def encrypt_message(message: str, key: bytes, IV:bytes, nr_rounds = 32) -> str: # cu CBC
+    # IV = secrets.token_bytes(8) # 64 biti random :D
     last_chunk_int = int.from_bytes(IV, 'little') # intializam cu IV in int
 
     encrypted_message = IV.hex()  # initialization vector necriptat in fata la rezultatul final

@@ -5,9 +5,12 @@ from time import sleep
 import XTEA
 from socket_util import *
 from diffie_hellman import *
-from zero2w.program import decrypt
+import RPi.GPIO as GPIO
+import sys
 
-GPIO.setup(board, GPIO.OUT)
+GPIO.setmode(GPIO.BCM)  # Use Broadcom pin numbering
+servo_pin = 14          # Your specific pin
+GPIO.setup(servo_pin, GPIO.OUT)
 i2c = busio.I2C(board.SCL, board.SDA)
 display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c, addr=0x3c)
 display.poweron()
@@ -15,11 +18,13 @@ display.poweron()
 display.fill(0)
 display.show()
 
-MIN_DUTY = 1638
-MAX_DUTY = 8192
-STEP = 36
+MIN_DUTY = 2.5
+MAX_DUTY = 12.5
+STEP = 0.5
 
-servo = GPIO.PWM(8, 50)
+#servo = GPIO.PWM(8, 50)
+servo = GPIO.PWM(servo_pin, 50)
+servo.start(7.5)
 
 def display_text(display, text, pos):
     x = pos[0]
@@ -30,11 +35,8 @@ def display_text(display, text, pos):
 
 
 def main():
-    servo.freq(50)
-    duty = 4915
-
-    servo.duty_u16(duty)
-
+    duty = 7.5
+    servo.ChangeDutyCycle(duty)
     s = socket_setup(25565)
     """
     START DIFFIE HELLMAN
@@ -57,7 +59,7 @@ def main():
     print(f"Public ...{public_key%100000}")
     print(f"Private ...{private_key%100000}")
     print(f"Trimit public")
-
+    print(ip)
     addr = (ip, port)
     socket_send(s, str(public_key), addr)
     print("am trimis cheia publica")
@@ -73,25 +75,32 @@ def main():
     """
     STOP DIFFIE HELLMAN
     """
-
     while True:
         display.fill(0)
         data = None
         while data is None:
             data = socket_listen(s)
-        msg = str(data)
+        msg = data.decode('utf-8')
         decrypt = XTEA.decrypt_message(msg, key)
+        decrypt = decrypt.strip('\x00')
+        print(decrypt)
+        IV = os.urandom(6)
         if decrypt == 'LeftButtonPressed':
+            print("l")
             duty = min(MAX_DUTY, duty + STEP)
         elif decrypt == 'RightButtonPressed':
+            print("r")
             duty = max(MIN_DUTY, duty - STEP)
-        servo.duty_u16(duty)
-        angle = (duty - MIN_DUTY) / STEP
-        print(angle)
+        duty = round(duty, 2)
+        servo.ChangeDutyCycle(duty)
+        angle = (duty - MIN_DUTY) * (180 / (MAX_DUTY - MIN_DUTY))
+        angle = round(angle, 1)
+        print(duty)
         display_text(display, str(angle), (0, 0))
         display.show()
-        reply = XTEA.encrypt_message(str(angle), key)
-
+        reply = XTEA.encrypt_message(str(angle), key, IV)
+        IV = bytes.fromhex(reply[16:32])
+        socket_send(s, reply, addr)
 
 
 try:

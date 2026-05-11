@@ -53,7 +53,7 @@ def encrypt_message(message: str, key: str, IV: bytes, nr_rounds = 32) -> str: #
 #----------------------------------------------------------DECRYPT----------------------------------------------------------------------
 
 def decrypt_64b(cypher: str, key : str, nr_rounds:int = 32) -> int: # chinul meu existential am pus v0 in loc de v1 undeva si crapa T-T acu e ok
-    key = ljust(key, b'\0',16).encode()
+    key = ljust(key, b'\0',16)#.encode()
     key = [int.from_bytes(key[0:4], 'little'), int.from_bytes(key[4:8], 'little'),
            int.from_bytes(key[8:12], 'little'), int.from_bytes(key[12:16], 'little')]
 
@@ -93,16 +93,16 @@ message = "pneumonoultramicroscopicsilicovolcaniconioza"   # BUG daca pui unicod
                  # daca pui emoji crapa la decode (cine ar fi creezut). Vezi: 🥰
 
 
-#09ca6f9ed30dca69
-print("text: ", message)
-KEY = '0123456789012345'
-#------------------------------------
-c = encrypt_message(message, KEY)
-print("cyphertext:",c)
-#-------------------------------------
-d = decrypt_message(c,KEY)
-print("decrypt:", d)
-
+# #09ca6f9ed30dca69
+# print("text: ", message)
+# KEY = '0123456789012345'
+# #------------------------------------
+# c = encrypt_message(message, KEY)
+# print("cyphertext:",c)
+# #-------------------------------------
+# d = decrypt_message(c,KEY)
+# print("decrypt:", d)
+#
 
 # --------------------------------------------------------TEST2------------------------------------------------------------------------
 # f = open("example/shrek.txt")

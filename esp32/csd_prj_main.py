@@ -1,3 +1,5 @@
+from os import urandom
+
 import network
 import time
 import usocket as socket
@@ -148,7 +150,7 @@ def main():
     lcd.putstr(f"Private ...{private_key % 100000}")
     time.sleep(1)
     lcd.clear()
-    lcd.putstr(f"Trimit public")
+    lcd.putstr(f"Astept cheia publica")
     addr = (ip, port)
     data = None
     while data is None:
@@ -164,15 +166,18 @@ def main():
     STOP DIFFIE HELLMAN
     """
     global left_pressed_flag, right_pressed_flag
+    IV = urandom(8)
     while True:
         message = None
         if left_pressed_flag == True:
-            message = XTEA.encrypt_message("LeftButtonPressed", key)
+            message = XTEA.encrypt_message("LeftButtonPressed", key, IV)
+            IV = bytes.fromhex(message[16:32])
             lcd.clear()
             lcd.putstr(f"Left        <-")
             left_pressed_flag = False
         elif right_pressed_flag == True:
-            message = XTEA.encrypt_message("RightButtonPressed", key)
+            message = XTEA.encrypt_message("RightButtonPressed", key, IV)
+            IV = bytes.fromhex(message[16:32])
             lcd.clear()
             lcd.putstr(f"Right       ->")
             right_pressed_flag = False
